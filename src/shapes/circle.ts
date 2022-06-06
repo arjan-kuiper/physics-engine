@@ -27,18 +27,18 @@ export default class Circle {
         this._position.set(this._position.x + vX, this._position.y + vY + this._gravity);
 
         // Border collision detection
-        if (this._position.x + this._radius > 500) {
-            this._position.setX(500 - this._radius);
+        if (this._position.x + this._radius / 2 > 500) {
+            this._position.setX(500 - this._radius / 2);
             this._oldPosition.setX(this._position.x + vX * this._bounce);
-        } else if (this._position.x - this._radius < 0) {
-            this._position.setX(0 + this._radius);
+        } else if (this._position.x - this._radius / 2 < 0) {
+            this._position.setX(0 + this._radius / 2);
             this._oldPosition.setX(this._position.x + vX * this._bounce);
         }
-        if (this._position.y + this._radius > 500) {
-            this._position.setY(500 - this._radius);
+        if (this._position.y + this._radius / 2 > 500) {
+            this._position.setY(500 - this._radius / 2);
             this._oldPosition.setY(this._position.y + vY * this._bounce);
-        } else if (this._position.y - this._radius < 0) {
-            this._position.setY(0 + this._radius);
+        } else if (this._position.y - this._radius / 2 < 0) {
+            this._position.setY(0 + this._radius / 2);
             this._oldPosition.setY(this._position.y + vY * this._bounce);
         }
     }

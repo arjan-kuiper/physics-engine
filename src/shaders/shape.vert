@@ -3,6 +3,7 @@ attribute float a_radius;
 attribute vec3 a_color;
 
 uniform vec2 u_resolution;
+uniform float u_time;
 
 varying vec2 v_resolution;
 varying vec2 v_clipSpace;
@@ -18,6 +19,6 @@ void main() {
     v_clipSpace = clipSpace;
     v_color = a_color;
     
-    gl_Position = vec4(clipSpace, 0, 1);
+    gl_Position = vec4(vec2(clipSpace.x, clipSpace.y + u_time), 0, 1);
     gl_PointSize = a_radius;
 }

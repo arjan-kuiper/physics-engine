@@ -10,6 +10,7 @@ export default class Renderer {
     private radiusAttributeLocation: number;
     private colorAttributeLocation: number;
     private resolutionUniformLocation: WebGLUniformLocation | null;
+    private timeUniformLocation: WebGLUniformLocation | null;
 
     private allShapes: Circle[] = [];
 
@@ -21,6 +22,7 @@ export default class Renderer {
         this.radiusAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_radius');
         this.colorAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
         this.resolutionUniformLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_resolution');
+        this.timeUniformLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_time');
 
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
         this.gl.clearColor(0, 0, 0, 0);
@@ -34,7 +36,7 @@ export default class Renderer {
         this.allShapes.push(shape);
     }
 
-    public update(): void {
+    public update(currentTime: number): void {
         if (this.allShapes.length > 0) {
 
             // Create an interleaved buffer for all of the shapes that have to be drawn
@@ -48,6 +50,9 @@ export default class Renderer {
             const radiusVertexSize = 1;
             const floatSize = Float32Array.BYTES_PER_ELEMENT;
             const stride = (positionVertexSize + colorVertexSize + radiusVertexSize) * floatSize;
+
+            // Update the time for the shader
+            this.gl.uniform1f(this.timeUniformLocation, currentTime);
 
             // Setup the buffer
             const shapeBuffer = this.gl.createBuffer();

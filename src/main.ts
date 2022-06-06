@@ -8,20 +8,23 @@ const gl = canvas.getContext("webgl2");
 
 if (gl) {
   const renderer = new Renderer(gl);
-  const circle1 = new Circle(250, 250, 10);
-  const circle2 = new Circle(400, 400, 20);
-
-  renderer.addShape(circle1);
-  renderer.addShape(circle2);
-
-  function loop() {
-    // requestAnimationFrame(loop);
-
-    circle1.calculatePosition();
-    circle2.calculatePosition();
+  const shapes: Circle[] = [];
   
-    renderer.update();
+  for (let i = 0; i < 10; i++) {
+    const c = new Circle(Math.random() * 500, Math.random() * 200, 20);
+    shapes.push(c);
+    renderer.addShape(c);
   }
 
-  loop();
+  function loop(time: number) {
+    requestAnimationFrame(loop);
+
+    for (let i = 0; i < shapes.length; i++) {
+      shapes[i].calculatePosition();
+    }
+
+    renderer.update(0);
+  }
+
+  loop(0);
 }
