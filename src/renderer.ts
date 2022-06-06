@@ -36,32 +36,38 @@ export default class Renderer {
 
     public update(): void {
         if (this.allShapes.length > 0) {
-            const buffer = new Float32Array(this.allShapes.flatMap((shape) => shape.buffer));
-            console.log(buffer);
-            return;
+
+            // Create an interleaved buffer for all of the shapes that have to be drawn
+            let buffer = [] as number[];
+            for (let i = 0; i < this.allShapes.length; i++) {
+                buffer = buffer.concat(this.allShapes[i].buffer);
+            }
+
+            const positionVertexSize = 2;
+            const colorVertexSize = 3;
+            const radiusVertexSize = 1;
+            const floatSize = Float32Array.BYTES_PER_ELEMENT;
+            const stride = (positionVertexSize + colorVertexSize + radiusVertexSize) * floatSize;
+
+            // Setup the buffer
+            const shapeBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, shapeBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(buffer), this.gl.STATIC_DRAW);
 
             // Positional Data
-            const positionBuffer = this.gl.createBuffer();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
-            this.gl.vertexAttribPointer(this.positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.positionAttributeLocation, 2, this.gl.FLOAT, false, stride , 0);
             this.gl.enableVertexAttribArray(this.positionAttributeLocation);
             
+            // Color Data
+            this.gl.vertexAttribPointer(this.colorAttributeLocation, 3, this.gl.FLOAT, false, stride, positionVertexSize * floatSize);
+            this.gl.enableVertexAttribArray(this.colorAttributeLocation);
+
             // Radius Data
-            const radiusBuffer = this.gl.createBuffer();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, radiusBuffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(radii), this.gl.STATIC_DRAW);
-            this.gl.vertexAttribPointer(this.radiusAttributeLocation, 1, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.radiusAttributeLocation, 1, this.gl.FLOAT, false, stride, (positionVertexSize + colorVertexSize) * floatSize);
             this.gl.enableVertexAttribArray(this.radiusAttributeLocation);
 
-            // Color Data
-            const colorBuffer = this.gl.createBuffer();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
-            this.gl.vertexAttribPointer(this.colorAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(this.colorAttributeLocation);
-            
-            this.gl.drawArrays(this.gl.POINTS, 0, positions.length / 2);
+            // Draw
+            this.gl.drawArrays(this.gl.POINTS, 0, this.allShapes.length);
         }
     }
 
