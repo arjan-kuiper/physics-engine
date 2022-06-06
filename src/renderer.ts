@@ -1,53 +1,68 @@
 import shapeVert from './shaders/shape.vert';
 import shapeFrag from './shaders/shape.frag';
+import { Circle } from './shapes';
 
 export default class Renderer {
     private gl: WebGL2RenderingContext;
     private shaderProgram: WebGLProgram | null;
 
     private positionAttributeLocation: number;
+    private radiusAttributeLocation: number;
+    private colorAttributeLocation: number;
     private resolutionUniformLocation: WebGLUniformLocation | null;
-    private colorUniformLocation: WebGLUniformLocation | null;
+
+    private allShapes: Circle[] = [];
 
     constructor(gl: WebGL2RenderingContext) {
         this.gl = gl;
         
         this.shaderProgram = this.initShaders(shapeVert, shapeFrag)!;
         this.positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+        this.radiusAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_radius');
+        this.colorAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
         this.resolutionUniformLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_resolution');
-        this.colorUniformLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_color');
 
-        let positionBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-        let positions = [
-            0, 0,
-            0, 500,
-            500, 500,
-            500, 500,
-            500, 0,
-            0, 0
-        ];
-        this.gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-        this.gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
         this.gl.useProgram(this.shaderProgram);
         this.gl.uniform2f(this.resolutionUniformLocation, this.gl.canvas.width, this.gl.canvas.height);
-        this.gl.uniform4f(this.colorUniformLocation, Math.random(), Math.random(), Math.random(), 1);
-        this.gl.enableVertexAttribArray(this.positionAttributeLocation);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-        let size = 2;
-        let type = this.gl.FLOAT;
-        let normalize = false;
-        let stride = 0;
-        let offset = 0;
-        this.gl.vertexAttribPointer(this.positionAttributeLocation, size, type, normalize, stride, offset);
+    }
 
-        var primitiveType = gl.TRIANGLES;
-        var count = positions.length;
-        this.gl.drawArrays(primitiveType, offset, count);
+    public addShape(shape: Circle): void {
+        this.allShapes.push(shape);
+    }
+
+    public update(): void {
+        if (this.allShapes.length > 0) {
+            const buffer = new Float32Array(this.allShapes.flatMap((shape) => shape.buffer));
+            console.log(buffer);
+            return;
+
+            // Positional Data
+            const positionBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
+            this.gl.vertexAttribPointer(this.positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(this.positionAttributeLocation);
+            
+            // Radius Data
+            const radiusBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, radiusBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(radii), this.gl.STATIC_DRAW);
+            this.gl.vertexAttribPointer(this.radiusAttributeLocation, 1, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(this.radiusAttributeLocation);
+
+            // Color Data
+            const colorBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+            this.gl.vertexAttribPointer(this.colorAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(this.colorAttributeLocation);
+            
+            this.gl.drawArrays(this.gl.POINTS, 0, positions.length / 2);
+        }
     }
 
     private initShaders(vertexShader: string, fragmentShader: string): WebGLProgram | null {

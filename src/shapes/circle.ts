@@ -3,7 +3,7 @@ import { Vector2 } from "../datatypes";
 export default class Circle {
     private _oldPosition: Vector2;
     private _position: Vector2;
-    private _color: string;
+    private _color: { r: number, g: number, b: number };
     private _radius: number;
     private _bounce: number;
     private _friction: number;
@@ -12,7 +12,7 @@ export default class Circle {
     constructor(x: number, y: number, radius: number) {
         this._oldPosition = new Vector2(x - 5, y - 2);
         this._position = new Vector2(x, y);
-        this._color = Math.floor(Math.random() * 16777215).toString(16);
+        this._color = { r: Math.random(), g: Math.random(), b: Math.random() };
         this._radius = radius;
         this._bounce = 0.8;
         this._friction = 0.995;
@@ -58,15 +58,22 @@ export default class Circle {
         }
     }
 
-    get color(): string {
-        return this._color;
-    }
-
     get position(): Vector2 {
         return this._position;
     }
 
     get radius(): number {
         return this._radius;
+    }
+
+    get buffer(): number[] {
+        return [
+            this._position.x,
+            this._position.y,
+            this._color.r,
+            this._color.g,
+            this._color.b,
+            this._radius,
+        ];
     }
 }
